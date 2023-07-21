@@ -40,7 +40,7 @@ exports.uploadFile = (req, res) => {
     message: req.body.message,
     sender_id: req.body.sender_id,
     chat_id: req.body.chat_id,
-    file_upload: req.file.path,
+    link: req.body.link,
   });
   newMessage
     .save()

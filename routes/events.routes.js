@@ -4,8 +4,15 @@ const eventService = require("../services/event.service");
 const auth = require("../middleware/auth");
 
 router.get("/", async (req, res) => {
-  const events = await eventService.getEvents();
+  const { page, limit } = req.query;
+  const events = await eventService.getEvents(Number(page), Number(limit));
   res.json(events);
+});
+
+router.get("/:id", async (req, res) => {
+  const eventId = req.params.id;
+  const event = await eventService.getEvent(eventId);
+  res.json(event);
 });
 
 router.post("/", auth, async (req, res) => {
@@ -15,6 +22,12 @@ router.post("/", auth, async (req, res) => {
   } catch (error) {
     res.json({ error: true });
   }
+});
+
+router.put("/:id", auth, async (req, res) => {
+  const eventId = req.params.id;
+  const updatedEvent = await eventService.updateEvent(eventId, req.body);
+  res.json(updatedEvent);
 });
 
 router.delete("/:id", auth, async (req, res) => {

@@ -10,7 +10,7 @@ const msgSchema = new mongoose.Schema(
       required: true,
     },
     chat_id: { type: mongoose.SchemaTypes.ObjectId, required: true },
-    file_upload: {
+    link: {
       type: Object,
     },
     unread: {

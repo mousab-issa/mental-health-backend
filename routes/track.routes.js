@@ -6,13 +6,7 @@ const auth = require("../middleware/auth");
 router.get("/", async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
   const tracks = await trackService.getTracks(Number(page), Number(limit));
-  console.log(tracks);
   res.json(tracks);
-});
-
-router.get("/:id", async (req, res) => {
-  const track = await trackService.getTrack(req.params.id);
-  res.json(track);
 });
 
 router.post("/", auth, async (req, res) => {
@@ -22,6 +16,11 @@ router.post("/", auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.toString() });
   }
+});
+
+router.get("/:id", async (req, res) => {
+  const track = await trackService.getTrack(req.params.id);
+  res.json(track);
 });
 
 router.delete("/:id", auth, async (req, res) => {
