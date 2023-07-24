@@ -44,23 +44,22 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  socket.on("sendMessage", (data) => {
-    console.log("DATA", data);
+  try {
+    socket.on("sendMessage", (data) => {
+      console.log("DATA", data);
 
-    const newMessage = new Message(data);
-    newMessage.save().then((message) => {
-      io.to(data.chat_id).emit("message", message);
-      io.to(data.sender_id).emit("notification", message);
+      const newMessage = new Message(data);
+      newMessage.save().then((message) => {
+        io.to(data.chat_id).emit("message", message);
+      });
     });
-  });
 
-  socket.on("joinChat", (chat_id) => {
-    socket.join(chat_id);
-  });
-
-  socket.on("joinNotification", (user_id) => {
-    socket.join(user_id);
-  });
+    socket.on("joinChat", (chat_id) => {
+      socket.join(chat_id);
+    });
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 server.listen(port, () => {});
