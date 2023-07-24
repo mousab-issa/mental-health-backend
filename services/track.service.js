@@ -26,7 +26,7 @@ exports.createTrack = async (trackData) => {
 exports.deleteTrack = async (trackId) => {
   const track = await Track.findById(trackId);
   if (!track) {
-    return;
+    throw new Error("Track not found.");
   }
 
   const imagePublicId = track.image.split("/").pop().split(".")[0];
@@ -42,7 +42,7 @@ exports.deleteTrack = async (trackId) => {
     // Deleting track from the database
     return await Track.findOneAndDelete({ _id: trackId });
   } catch (error) {
-    return error;
+    throw new Error(error.message);
   }
 };
 
