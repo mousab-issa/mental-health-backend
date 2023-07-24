@@ -26,7 +26,9 @@ const getallusers = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({
+      email: { $regex: new RegExp("^" + req.body.email.toLowerCase(), "i") },
+    });
     if (!user) {
       return res.status(400).json({ error: "Incorrect credentials" });
     }
@@ -80,7 +82,9 @@ const refreshToken = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const emailPresent = await User.findOne({ email: req.body.email });
+    const emailPresent = await User.findOne({
+      email: { $regex: new RegExp("^" + req.body.email.toLowerCase(), "i") },
+    });
     if (emailPresent) {
       return res.status(400).json({ error: "Email already exists" });
     }
