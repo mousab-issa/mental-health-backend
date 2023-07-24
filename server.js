@@ -26,7 +26,7 @@ app.use("/api/user", userRouter);
 app.use("/api/doctor", doctorRouter);
 app.use("/api/appointment", appointRouter);
 app.use("/api/notification", notificationRouter);
-app.use("/api/messages", chatRouter);
+app.use("/api/chat", chatRouter);
 app.use("/api/events", eventRouter);
 app.use("/api/tracks", tracksRouter);
 
@@ -49,10 +49,16 @@ io.on("connection", (socket) => {
     newMessage.save().then((message) => {
       io.to(data.chat_id).emit("message", message);
     });
+
+    // io.to(data.sender_id).emit("notification", message);
   });
 
   socket.on("joinChat", (chat_id) => {
     socket.join(chat_id);
+  });
+
+  socket.on("joinNotification", (user_id) => {
+    socket.join(user_id);
   });
 });
 

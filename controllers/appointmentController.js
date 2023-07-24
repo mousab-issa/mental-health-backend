@@ -49,7 +49,10 @@ const bookAppointment = async (req, res) => {
     const result = await appointment.save();
 
     // Create the chat for the appointment
-    const chat = new Chat({ appointmentId: result._id });
+    const chat = new Chat({
+      appointmentId: result._id,
+      participants: [req.body.doctorId, user._id],
+    });
     await chat.save();
 
     return res.status(201).send(result);
