@@ -45,12 +45,14 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   socket.on("sendMessage", (data) => {
+    console.log("DATA", data);
+
     const newMessage = new Message(data);
     newMessage.save().then((message) => {
       io.to(data.chat_id).emit("message", message);
     });
 
-    // io.to(data.sender_id).emit("notification", message);
+    io.to(data.sender_id).emit("notification", message);
   });
 
   socket.on("joinChat", (chat_id) => {

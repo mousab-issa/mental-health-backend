@@ -23,25 +23,38 @@ const getAllAppointments = async (req, res) => {
 
 const bookAppointment = async (req, res) => {
   try {
-    const appointment = await Appointment({
-      date: req.body.date,
-      time: req.body.time,
-      doctorId: req.body.doctorId,
+    const { date, time, doctorId } = req.body;
+    const existingAppointment = await Appointment.findOne({
+      date,
+      time,
+      doctorId,
+    });
+
+    if (existingAppointment) {
+      return res
+        .status(400)
+        .send("An appointment already exists at this time.");
+    }
+
+    const appointment = new Appointment({
+      date,
+      time,
+      doctorId,
       userId: req.locals,
     });
 
-    const userNotifications = Notification({
+    const userNotifications = new Notification({
       userId: req.locals,
-      content: `You booked an appointment with Dr. ${req.body.doctorname} for ${req.body.date} ${req.body.time}`,
+      content: `You booked an appointment with Dr. ${req.body.doctorname} for ${date} ${time}`,
     });
 
     await userNotifications.save();
 
     const user = await User.findById(req.locals);
 
-    const doctorNotification = Notification({
-      userId: req.body.doctorId,
-      content: `You have an appointment with ${user.firstname} ${user.lastname} on ${req.body.date} at ${req.body.time}`,
+    const doctorNotification = new Notification({
+      userId: doctorId,
+      content: `You have an appointment with ${user.firstname} ${user.lastname} on ${date} at ${time}`,
     });
 
     await doctorNotification.save();
@@ -51,8 +64,9 @@ const bookAppointment = async (req, res) => {
     // Create the chat for the appointment
     const chat = new Chat({
       appointmentId: result._id,
-      participants: [req.body.doctorId, user._id],
+      participants: [doctorId, user._id],
     });
+
     await chat.save();
 
     return res.status(201).send(result);
