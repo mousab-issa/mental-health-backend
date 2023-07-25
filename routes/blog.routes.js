@@ -1,7 +1,7 @@
 // routes/blogPost.routes.js
 const express = require("express");
 const router = express.Router();
-const blogPostService = require("../services/blogPost.service");
+const blogPostService = require("../services/blog.service");
 const auth = require("../middleware/auth");
 
 router.get("/", async (req, res) => {

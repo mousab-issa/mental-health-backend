@@ -1,74 +1,47 @@
-// routes/blogPost.routes.js
-const express = require("express");
-const router = express.Router();
-const blogPostService = require("../services/blogPost.service");
-const auth = require("../middleware/auth");
+// services/blogPost.service.js
+const cloudinary = require("cloudinary").v2;
+const BlogPost = require("../models/blog.schema");
 
-router.get("/", async (req, res) => {
-  try {
-    const { page = 1, limit = 10 } = req.query;
-    const blogPosts = await blogPostService.getBlogPosts(
-      Number(page),
-      Number(limit)
-    );
-    res.status(200).json({ status: "success", data: blogPosts });
-  } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
+exports.getBlogPosts = async (page, limit) => {
+  return await BlogPost.find()
+    .skip((page - 1) * limit)
+    .limit(limit);
+};
+
+exports.getBlogPost = async (id) => {
+  return await BlogPost.findById(id);
+};
+
+exports.createBlogPost = async (blogPostData) => {
+  const blogPost = new BlogPost(blogPostData);
+  return await blogPost.save();
+};
+
+exports.deleteBlogPost = async (blogPostId) => {
+  const blogPost = await BlogPost.findById(blogPostId);
+  if (!blogPost) {
+    throw new Error("Blog post not found.");
   }
-});
 
-router.post("/", auth, async (req, res) => {
+  const imagePublicId = blogPost.image.split("/").pop().split(".")[0];
+  const thumbnailPublicId = blogPost.thumbnail.split("/").pop().split(".")[0];
+
   try {
-    const blogPost = await blogPostService.createBlogPost(req.body);
-    res.status(201).json({ status: "success", data: blogPost });
-  } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
-  }
-});
+    // Deleting image and thumbnail from Cloudinary
+    await Promise.all([
+      cloudinary.uploader.destroy(imagePublicId),
+      cloudinary.uploader.destroy(thumbnailPublicId),
+    ]);
 
-router.get("/:id", async (req, res) => {
-  try {
-    const blogPost = await blogPostService.getBlogPost(req.params.id);
-    if (!blogPost) {
-      return res
-        .status(404)
-        .json({ status: "error", message: "Blog post not found." });
-    }
-    res.status(200).json({ status: "success", data: blogPost });
+    // Deleting blog post from the database
+    return await BlogPost.findOneAndDelete({ _id: blogPostId });
   } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
+    throw new Error(error.message);
   }
-});
+};
 
-router.delete("/:id", auth, async (req, res) => {
-  try {
-    const deletedBlogPost = await blogPostService.deleteBlogPost(req.params.id);
-    if (!deletedBlogPost) {
-      return res
-        .status(404)
-        .json({ status: "error", message: "Blog post not found." });
-    }
-    res.status(200).json({ status: "success", data: deletedBlogPost });
-  } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
-  }
-});
-
-router.put("/:id", auth, async (req, res) => {
-  try {
-    const updatedBlogPost = await blogPostService.updateBlogPost(
-      req.params.id,
-      req.body
-    );
-    if (!updatedBlogPost) {
-      return res
-        .status(404)
-        .json({ status: "error", message: "Blog post not found." });
-    }
-    res.status(200).json({ status: "success", data: updatedBlogPost });
-  } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
-  }
-});
-
-module.exports = router;
+exports.updateBlogPost = async (blogPostId, updateData) => {
+  return await BlogPost.findByIdAndUpdate(blogPostId, updateData, {
+    new: true,
+  });
+};

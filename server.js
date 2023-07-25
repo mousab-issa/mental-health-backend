@@ -13,6 +13,7 @@ const eventRouter = require("./routes/events.routes");
 const notificationRouter = require("./routes/notificationRouter");
 const chatRouter = require("./routes/chat.routes");
 const tracksRouter = require("./routes/track.routes");
+const blogRouter = require("./routes/blog.routes");
 
 const Message = require("./models/messageModel");
 
@@ -28,7 +29,8 @@ app.use("/api/appointment", appointRouter);
 app.use("/api/notification", notificationRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/events", eventRouter);
-app.use("/api/blog", tracksRouter);
+app.use("/api/tracks", tracksRouter);
+app.use("/api/blogRouter", tracksRouter);
 
 app.get("*", (req, res) => {
   res.json({ status: "connected" });
