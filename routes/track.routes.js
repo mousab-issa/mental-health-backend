@@ -6,7 +6,7 @@ const auth = require("../middleware/auth");
 router.get("/", async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
-    console.log("HERERERE");
+
     const tracks = await trackService.getTracks(Number(page), Number(limit));
 
     res.status(200).json({ status: "success", data: tracks });

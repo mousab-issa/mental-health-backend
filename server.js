@@ -50,6 +50,7 @@ io.on("connection", (socket) => {
     socket.on("sendMessage", (data) => {
       const newMessage = new Message(data);
       newMessage.save().then((message) => {
+        console.log("New Message", message);
         io.to(data.chat_id).emit("message", message);
       });
     });
