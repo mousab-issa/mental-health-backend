@@ -47,5 +47,31 @@ exports.deleteTrack = async (trackId) => {
 };
 
 exports.updateTrack = async (trackId, updateData) => {
+  const track = await Track.findById(trackId);
+
+  if (!track) {
+    throw new Error("Track not found.");
+  }
+
+  let deletePromises = [];
+
+  if (updateData.link && updateData.link !== track.link) {
+    const linkPublicId = track.link.split("/").pop().split(".")[0];
+    deletePromises.push(cloudinary.uploader.destroy(linkPublicId));
+  }
+
+  if (updateData.image && updateData.image !== track.image) {
+    const imagePublicId = track.image.split("/").pop().split(".")[0];
+    deletePromises.push(cloudinary.uploader.destroy(imagePublicId));
+  }
+
+  if (deletePromises.length > 0) {
+    try {
+      await Promise.all(deletePromises);
+    } catch (error) {
+      throw new Error("Error deleting outdated files: " + error.message);
+    }
+  }
+
   return await Track.findByIdAndUpdate(trackId, updateData, { new: true });
 };
