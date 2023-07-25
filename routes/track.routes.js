@@ -7,6 +7,7 @@ router.get("/", async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
     const tracks = await trackService.getTracks(Number(page), Number(limit));
+    console.log(tracks);
     res.status(200).json({ status: "success", data: tracks });
   } catch (error) {
     res.status(500).json({ status: "error", message: error.message });
