@@ -28,7 +28,7 @@ app.use("/api/appointment", appointRouter);
 app.use("/api/notification", notificationRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/events", eventRouter);
-app.use("/api/tracks", tracksRouter);
+app.use("/api/blog", tracksRouter);
 
 app.get("*", (req, res) => {
   res.json({ status: "connected" });
@@ -46,8 +46,6 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   try {
     socket.on("sendMessage", (data) => {
-      console.log("DATA", data);
-
       const newMessage = new Message(data);
       newMessage.save().then((message) => {
         io.to(data.chat_id).emit("message", message);
