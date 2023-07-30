@@ -76,7 +76,7 @@ const refreshToken = async (req, res) => {
       }
     );
 
-    return res.json({ data: { token } });
+    return res.json({ data: { accessToken } });
   });
 };
 
