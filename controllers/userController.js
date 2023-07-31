@@ -82,11 +82,13 @@ const refreshToken = async (req, res) => {
 
 const register = async (req, res) => {
   try {
+    console.log("Hello");
     const emailPresent = await User.findOne({
       email: { $regex: new RegExp("^" + req.body.email.toLowerCase(), "i") },
     });
+
     if (emailPresent) {
-      return res.status(400).json({ error: "Email already exists" });
+      return res.status(401).json({ error: "Email already exists" });
     }
 
     const hashedPass = await bcrypt.hash(req.body.password, 10);
@@ -99,17 +101,27 @@ const register = async (req, res) => {
   }
 };
 
+const cloudinary = require("cloudinary").v2;
+
 const updateprofile = async (req, res) => {
   try {
-    const hashedPass = await bcrypt.hash(req.body.password, 10);
+    const user = await User.findById(req.locals);
+
+    if (user.profile_pic !== req.body.profile_pic) {
+      let publicId = user.profile_pic.split("/").pop().split(".")[0];
+
+      await cloudinary.uploader.destroy(publicId);
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       req.locals,
-      { ...req.body, password: hashedPass },
+      { ...req.body },
       { new: true }
     );
 
     return res.status(200).json({ data: { user: updatedUser } });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ error: "Unable to update user" });
   }
 };
